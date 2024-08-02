@@ -7,6 +7,7 @@ private:
 
 public:
     let() = default;
+    let(const char* val) : value(std::string(val)) {}   // Convert const char to string
     let(T val) : value(val) {}
 
     void show() {
@@ -19,7 +20,11 @@ public:
     }
 
     friend std::istream& operator>>(std::istream& input, let<T>& obj) {
-        input >> obj.value;
+        if constexpr (std::is_same_v<T, std::string>) {
+            std::getline(input, obj.value);
+        } else {
+            input >> obj.value;
+        }
         return input;
     }
 
@@ -29,27 +34,8 @@ public:
     }
 };
 
-int main() {
-    let k = 5;
-    let l = 5.3;
-
-    std::cout << "Initial value of k: " << k << std::endl;
-    std::cout << "Initial value of l: " << l << std::endl;
-
-    k = 69;
-    l = 42.66;
-
-    std::cout << "Value of k after reassignment: " << k << std::endl;
-    std::cout << "Value of l after reassignment: " << l << std::endl;
-
-    std::cout << "Enter a value for k: ";
-    std::cin >> k;
-    std::cout << "Enter a value for l: ";
-    std::cin >> l;
-
-    std::cout << "User input value of k: " << k << std::endl;
-    std::cout << "User input value of l: " << l << std::endl;
-
-
-    return 0;
-}
+// Class template argument deduction guides
+let(int) -> let<int>;
+let(double) -> let<double>;
+let(const char*) -> let<std::string>;
+let(std::string) -> let<std::string>;
